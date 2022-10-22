@@ -17,6 +17,12 @@ PWD = os.path.dirname(os.path.realpath(__file__))
 TEST_DIR = os.path.join(PWD, 'test')
 
 
+def _update_format_env_variable():
+    modified_env = os.environ.copy()
+    modified_env['FORMAT'] = os.path.join(PWD, 'format.py')
+    return modified_env
+
+
 def _create_file(file_name):
     file_path = os.path.join(TEST_DIR, file_name)
     Path(file_path).touch()
@@ -141,6 +147,7 @@ class TestRenameFile(unittest.TestCase):
     def setUp(self):
         _init_test_dir()
         os.chdir(TEST_DIR)
+        self._env = _update_format_env_variable()
         self._expected_hash = _create_file(self._test_file_name)
 
     def tearDown(self):
@@ -153,6 +160,7 @@ class TestRenameFile(unittest.TestCase):
         subprocess.run(f'frmt "{self._test_file_name}"',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         self.assertEqual(True, os.path.exists(expected_path))
@@ -166,6 +174,7 @@ class TestRenameFile(unittest.TestCase):
         subprocess.run(f'frmt -l "{self._test_file_name}"',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         self.assertEqual(True, os.path.exists(expected_path))
@@ -180,6 +189,7 @@ class TestRenameFile(unittest.TestCase):
         subprocess.run(f'frmt -d "{self._test_file_name}"',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         self.assertEqual(True, os.path.exists(original_path))
@@ -195,6 +205,7 @@ class TestRenameDirectory(unittest.TestCase):
     def setUp(self):
         _init_test_dir()
         os.chdir(TEST_DIR)
+        self._env = _update_format_env_variable()
         _create_dir(self._test_dir_name)
 
     def tearDown(self):
@@ -207,6 +218,7 @@ class TestRenameDirectory(unittest.TestCase):
         subprocess.run(f'frmt "{self._test_dir_name}"',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         self.assertEqual(True, os.path.exists(expected_path))
@@ -219,6 +231,7 @@ class TestRenameDirectory(unittest.TestCase):
         subprocess.run(f'frmt -l "{self._test_dir_name}"',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         self.assertEqual(True, os.path.exists(expected_path))
@@ -232,6 +245,7 @@ class TestRenameDirectory(unittest.TestCase):
         subprocess.run(f'frmt -d "{self._test_dir_name}"',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         self.assertEqual(True, os.path.exists(original_path))
@@ -256,6 +270,7 @@ class TestRenameRecursiveFiles(unittest.TestCase):
     def setUp(self):
         _init_test_dir()
         os.chdir(TEST_DIR)
+        self._env = _update_format_env_variable()
         self._hashes_dict = _create_test_tree(self._tree)
 
     def tearDown(self):
@@ -285,6 +300,7 @@ class TestRenameRecursiveFiles(unittest.TestCase):
         subprocess.run('frmt -r "TEST DIR 1"',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         _assert_tree_renaming(self, expected_tree,
@@ -315,6 +331,7 @@ class TestRenameRecursiveFiles(unittest.TestCase):
             'frmt -r -f "TEST DIR 1"',
             shell=True,
             check=True,
+            env=self._env,
             stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         _assert_tree_renaming(self,
@@ -340,6 +357,7 @@ class TestRenameNumberedFiles(unittest.TestCase):
     def setUp(self):
         _init_test_dir()
         os.chdir(TEST_DIR)
+        self._env = _update_format_env_variable()
 
     def tearDown(self):
         _remove_dir(TEST_DIR)
@@ -367,6 +385,7 @@ class TestRenameNumberedFiles(unittest.TestCase):
         subprocess.run('frmt -f -n sample "TEST DIR 1"/*',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         _assert_tree_renaming(self, expected_tree, hashes_dict,
@@ -404,6 +423,7 @@ class TestRenameNumberedFiles(unittest.TestCase):
         subprocess.run('frmt -f -n sample "TEST DIR 1"/*',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         _assert_tree_renaming(self, expected_tree, hashes_dict,
@@ -427,6 +447,7 @@ class TestExcludeDirectory(unittest.TestCase):
     def setUp(self):
         _init_test_dir()
         os.chdir(TEST_DIR)
+        self._env = _update_format_env_variable()
         self._hashes_dict = _create_test_tree(self._tree)
 
     def tearDown(self):
@@ -456,6 +477,7 @@ class TestExcludeDirectory(unittest.TestCase):
         subprocess.run('frmt -r -e "TEST DIR 2" "TEST DIR 1"',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         _assert_tree_renaming(self, expected_tree,
@@ -479,6 +501,7 @@ class TestToLower(unittest.TestCase):
     def setUp(self):
         _init_test_dir()
         os.chdir(TEST_DIR)
+        self._env = _update_format_env_variable()
         self._hashes_dict = _create_test_tree(self._tree)
 
     def tearDown(self):
@@ -508,6 +531,7 @@ class TestToLower(unittest.TestCase):
         subprocess.run('frmt -r -l "TEST DIR 1"',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         _assert_tree_renaming(self, expected_tree,
@@ -531,6 +555,7 @@ class TestSubstitute(unittest.TestCase):
     def setUp(self):
         _init_test_dir()
         os.chdir(TEST_DIR)
+        self._env = _update_format_env_variable()
         self._hashes_dict = _create_test_tree(self._tree)
 
     def tearDown(self):
@@ -560,6 +585,7 @@ class TestSubstitute(unittest.TestCase):
         subprocess.run('frmt -r -s TEST/SAMPLE "TEST DIR 1"',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         _assert_tree_renaming(self, expected_tree,
@@ -580,6 +606,7 @@ class TestRenamePP3FileInImages(unittest.TestCase):
     def setUp(self):
         _init_test_dir()
         os.chdir(TEST_DIR)
+        self._env = _update_format_env_variable()
         self._hashes_dict = _create_test_tree(self._tree)
 
     def tearDown(self):
@@ -606,6 +633,7 @@ class TestRenamePP3FileInImages(unittest.TestCase):
         subprocess.run('frmt -n sample *.jpg',
                        shell=True,
                        check=True,
+                       env=self._env,
                        stdout=subprocess.DEVNULL)
         self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
         _assert_tree_renaming(self, expected_tree,
