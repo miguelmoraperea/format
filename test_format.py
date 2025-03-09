@@ -483,6 +483,61 @@ class TestExcludeDirectory(unittest.TestCase):
         _assert_tree_renaming(self, expected_tree,
                               self._hashes_dict, expected_renaming, TEST_DIR)
 
+class TestToCapitalize(unittest.TestCase):
+
+    _tree = {
+        'TEST DIR 1': {
+            'TEST FILE 1': None,
+            'TEST DIR 2': {
+                'TEST FILE 2': None,
+                'TEST DIR 3': {
+                    'TEST FILE 3': None,
+                }
+            }
+        }
+    }
+
+    def setUp(self):
+        _init_test_dir()
+        os.chdir(TEST_DIR)
+        self._env = _update_format_env_variable()
+        self._hashes_dict = _create_test_tree(self._tree)
+
+    def tearDown(self):
+        _remove_dir(TEST_DIR)
+
+    def test_recursive(self):
+        expected_tree = {
+            'Test_Dir_1': {
+                'Test_File_1': None,
+                'Test_Dir_2': {
+                    'Test_File_2': None,
+                    'Test_Dir_3': {
+                        'Test_File_3': None,
+                    }
+                }
+            }
+        }
+        expected_renaming = {
+            'Test_Dir_1': 'TEST DIR 1',
+            'Test_File_1': 'TEST FILE 1',
+            'Test_Dir_2': 'TEST DIR 2',
+            'Test_File_2': 'TEST FILE 2',
+            'Test_Dir_3': 'TEST DIR 3',
+            'Test_File_3': 'TEST FILE 3',
+        }
+        hash_tree_before = _hashdir(TEST_DIR)
+        subprocess.run('frmt -r -l "TEST DIR 1"',
+                       shell=True,
+                       check=True,
+                       env=self._env,
+                       stdout=subprocess.DEVNULL)
+        self.assertEqual(hash_tree_before, _hashdir(TEST_DIR))
+        _assert_tree_renaming(self, expected_tree,
+                              self._hashes_dict, expected_renaming, TEST_DIR)
+
+
+
 
 class TestToLower(unittest.TestCase):
 

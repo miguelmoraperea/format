@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "your_project_name"  # Replace with your actual project name
+version = "0.1.0"  # Update as needed
+# description = "A short description of your project"
+# authors = ["Your Name \<your.email@example.com\>"]
+
+[tool.poetry.dependencies]
+python = ">=3.13,<4.0"  # Update this to match checksumdir's requirements
+checksumdir = "^1.2.0"
+pillow = "^11.1.0"
+natsort = "^8.4.0"
+
+[tool.pyright]
+exclude = [ "venv" ]
+venvPath = "."
+venv = "venv"
