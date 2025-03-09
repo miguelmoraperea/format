@@ -12,6 +12,7 @@ from natsort import natsorted
 CWD = os.getcwd()
 IS_DRY_RUN = False
 IS_TO_LOWER = False
+IS_TO_CAPITALIZE = False
 IS_RECURSIVE = False
 IS_FILE_ONLY = False
 EXCLUDE_DIRS = []
@@ -84,8 +85,16 @@ class Rename:
             self._last_dir = dirname(full_path)
             return join(dir_name, tmp)
 
-        tmp = name.lower() if IS_TO_LOWER else name
+        tmp = name
+        if IS_TO_LOWER:
+            tmp = name.lower()
+        elif IS_TO_CAPITALIZE:
+            tmp = tmp.replace('_', ' ')
+            for word in tmp.split():
+                tmp = tmp.replace(word, word.capitalize())
+
         tmp2 = tmp.replace(' ', '_')
+        tmp2 = tmp2.replace('Of', 'of')
 
         if SUBSTITUTE:
             old, new = SUBSTITUTE[0].split('/', maxsplit=1)
@@ -99,6 +108,7 @@ class Rename:
 def main():
     global IS_DRY_RUN
     global IS_TO_LOWER
+    global IS_TO_CAPITALIZE
     global IS_RECURSIVE
     global IS_FILE_ONLY
     global EXCLUDE_DIRS
@@ -113,6 +123,8 @@ def main():
                         help='Apply reformatting recursively')
     parser.add_argument('-l', '--lower', action='store_true',
                         help='Change to all lower case')
+    parser.add_argument('-c', '--capitalize', action='store_true',
+                        help='Capitalize first letter of each word')
     parser.add_argument('-f', '--files', action='store_true',
                         help='Change files only, ignore dirs')
     parser.add_argument('-e', '--exclude_dirs', nargs=1, default=[],
@@ -126,6 +138,7 @@ def main():
 
     IS_DRY_RUN = args.dry_run
     IS_TO_LOWER = args.lower
+    IS_TO_CAPITALIZE = args.capitalize
     IS_RECURSIVE = args.recursive
     IS_FILE_ONLY = args.files
     EXCLUDE_DIRS = args.exclude_dirs
